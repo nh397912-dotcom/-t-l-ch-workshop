@@ -16,6 +16,7 @@ const Footer: React.FC = () => {
             <h4 className="font-bold mb-4 uppercase text-xs tracking-widest font-sans">Liên kết nhanh</h4>
             <ul className="space-y-2 text-sm opacity-70 font-sans">
               <li><a href="https://gom-my-thien-70d9mszo5-nh397912-dotcoms-projects.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-clay transition-colors">Khám phá Di sản Mỹ Thiện</a></li>
+              <li><a href="https://nan-gom.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-clay transition-colors">Xưởng Nặn gốm 3D Trực tuyến</a></li>
               <li><a href="https://shop-gom-my-thien.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-clay transition-colors">Cửa hàng Gốm trực tuyến</a></li>
               <li><a href="exchange.html" className="hover:text-brand-clay transition-colors">Sàn giao lưu gốm cổ</a></li>
               <li><a href="https://chatgpt.com" className="hover:text-brand-clay transition-colors">Tư vấn nghệ nhân AI</a></li>

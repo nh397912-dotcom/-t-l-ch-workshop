@@ -25,10 +25,13 @@ const Header: React.FC = () => {
             </a>
           </div>
           
-          <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-[11px] font-bold text-brand-dark uppercase tracking-wider">
+          <nav className="hidden lg:flex items-center gap-4 xl:gap-6 text-[11px] font-bold text-brand-dark uppercase tracking-wider">
             <a href="index.html" className="text-brand-clay transition-colors border-b-2 border-brand-clay pb-1">Đặt lịch</a>
             <a href="https://gom-my-thien-70d9mszo5-nh397912-dotcoms-projects.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-clay transition-colors whitespace-nowrap flex items-center gap-1">
               Di sản <span className="text-[8px] opacity-50">↗</span>
+            </a>
+            <a href="https://nan-gom.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-clay transition-colors whitespace-nowrap flex items-center gap-1 text-brand-terracotta">
+              Xưởng 3D <span className="text-[8px] opacity-50">↗</span>
             </a>
             <a href="https://shop-gom-my-thien.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-clay transition-colors whitespace-nowrap flex items-center gap-1 text-brand-accent">
               Cửa hàng <span className="text-[8px] opacity-50">↗</span>
