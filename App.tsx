@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { AuthProvider } from './contexts/AuthContext';
@@ -16,6 +16,31 @@ const WorkshopBookingContent: React.FC = () => {
     note: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // Logic tính giá hợp lý
+  const pricing = useMemo(() => {
+    let basePricePerGuest = 150000; // Mặc định 60 phút
+    if (formData.duration === '90 phút') basePricePerGuest = 220000;
+    if (formData.duration === '120 phút') basePricePerGuest = 300000;
+
+    const rawTotal = basePricePerGuest * formData.guests;
+    
+    // Chiết khấu theo số lượng khách
+    let discount = 0;
+    if (formData.guests >= 10) discount = 0.2; // Giảm 20% cho đoàn > 10 người
+    else if (formData.guests >= 5) discount = 0.1; // Giảm 10% cho đoàn > 5 người
+
+    const discountAmount = rawTotal * discount;
+    const finalTotal = rawTotal - discountAmount;
+
+    return {
+      unitPrice: basePricePerGuest,
+      subtotal: rawTotal,
+      discountPercent: discount * 100,
+      discountAmount,
+      total: finalTotal
+    };
+  }, [formData.guests, formData.duration]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,22 +59,60 @@ const WorkshopBookingContent: React.FC = () => {
   if (isSubmitted) {
     return (
       <div className="flex-grow flex items-center justify-center p-6 bg-pottery-texture">
-        <div className="max-w-2xl w-full bg-white rounded-[2rem] shadow-2xl p-12 text-center border-t-[12px] border-brand-clay animate-fade-in-up">
-          <div className="text-7xl mb-8">🏺</div>
-          <h2 className="text-4xl font-serif font-bold text-brand-dark mb-6">Xác nhận Đặt lịch</h2>
-          <div className="text-left bg-brand-glaze/30 p-8 rounded-2xl mb-8 border border-brand-sand/50">
-            <p className="mb-3 text-lg">Chào <strong>{formData.name}</strong>,</p>
-            <p className="text-gray-700 leading-relaxed">
-              Yêu cầu trải nghiệm gốm Mỹ Thiện vào ngày <strong>{formData.date}</strong> ({formData.timeSlot}) đã được ghi nhận. 
-              Chúng tôi sẽ liên hệ sớm nhất qua số <strong>{formData.phone}</strong> để hoàn tất thủ tục.
-            </p>
+        <div className="max-w-2xl w-full bg-white rounded-[2rem] shadow-2xl p-8 md:p-12 text-center border-t-[12px] border-brand-clay animate-fade-in-up">
+          <div className="text-6xl mb-6">📝</div>
+          <h2 className="text-3xl font-serif font-bold text-brand-dark mb-4">Thông tin Thanh toán</h2>
+          <p className="text-gray-600 mb-8">Yêu cầu của bạn đã được ghi nhận. Vui lòng kiểm tra lại chi phí và thực hiện thanh toán để hoàn tất đặt lịch.</p>
+          
+          <div className="bg-brand-glaze/30 p-8 rounded-3xl mb-8 border border-brand-sand/50 text-left font-sans shadow-inner">
+            <div className="flex justify-between border-b border-brand-sand/30 pb-4 mb-4">
+              <span className="text-gray-500">Khách hàng:</span>
+              <span className="font-bold text-brand-dark">{formData.name}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-500">Dịch vụ:</span>
+              <span className="text-brand-dark">Workshop {formData.duration} ({formData.guests} người)</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-500">Đơn giá:</span>
+              <span>{pricing.unitPrice.toLocaleString()}đ / khách</span>
+            </div>
+            <div className="flex justify-between mb-2 text-sm">
+              <span className="text-gray-500">Tạm tính:</span>
+              <span>{pricing.subtotal.toLocaleString()}đ</span>
+            </div>
+            {pricing.discountAmount > 0 && (
+              <div className="flex justify-between mb-2 text-green-600 text-sm italic">
+                <span>Ưu đãi đoàn đông ({pricing.discountPercent}%):</span>
+                <span>-{pricing.discountAmount.toLocaleString()}đ</span>
+              </div>
+            )}
+            <div className="flex justify-between border-t border-brand-clay/20 pt-4 mt-4">
+              <span className="text-lg font-bold text-brand-terracotta uppercase">Tổng chi phí:</span>
+              <span className="text-2xl font-black text-brand-terracotta">{pricing.total.toLocaleString()}đ</span>
+            </div>
           </div>
-          <button 
-            onClick={() => setIsSubmitted(false)}
-            className="bg-brand-terracotta text-white font-bold py-5 px-12 rounded-full hover:bg-brand-clay transition-all shadow-xl transform hover:-translate-y-1"
-          >
-            Đặt thêm lịch mới
-          </button>
+
+          <div className="bg-white border-2 border-dashed border-brand-clay/30 p-6 rounded-2xl mb-8 flex flex-col items-center">
+             <div className="text-sm font-bold text-brand-clay uppercase mb-2">Quét mã QR Thanh toán</div>
+             <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=STK:123456789-NH:VCB-AMT:${pricing.total}-MSG:Booking-${formData.phone}`} alt="QR Code" className="w-32 h-32 mb-4" />
+             <p className="text-xs text-gray-500 italic">Nội dung chuyển khoản: Workshop - {formData.phone}</p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button 
+              onClick={() => setIsSubmitted(false)}
+              className="bg-gray-100 text-gray-700 font-bold py-4 px-8 rounded-2xl hover:bg-gray-200 transition-all"
+            >
+              Chỉnh sửa thông tin
+            </button>
+            <button 
+              onClick={() => window.location.href = 'index.html'}
+              className="bg-brand-terracotta text-white font-bold py-4 px-12 rounded-2xl hover:bg-brand-clay transition-all shadow-xl transform hover:-translate-y-1"
+            >
+              Hoàn tất & Về trang chủ
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -95,10 +158,21 @@ const WorkshopBookingContent: React.FC = () => {
               <LocationService />
 
               <div className="mt-8 pt-6 border-t border-brand-sand/30">
-                <h4 className="text-brand-terracotta font-bold text-sm uppercase mb-4">Chi phí trải nghiệm</h4>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <span className="w-10 h-10 rounded-full bg-brand-clay/10 flex items-center justify-center shrink-0">💵</span>
-                  <p>150.000đ - 350.000đ / người</p>
+                <h4 className="text-brand-terracotta font-bold text-sm uppercase mb-4 text-center">Bảng giá tham khảo</h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600 italic">Cơ bản (60 phút)</span>
+                    <span className="font-bold">150k/người</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600 italic">Sáng tạo (90 phút)</span>
+                    <span className="font-bold">220k/người</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600 italic">Chuyên sâu (120 phút)</span>
+                    <span className="font-bold">300k/người</span>
+                  </div>
+                  <p className="text-[10px] text-brand-clay mt-2">* Miễn phí nung gốm & tráng men cơ bản. Giảm giá 10-20% cho đoàn khách từ 5 người.</p>
                 </div>
               </div>
             </div>
@@ -146,26 +220,31 @@ const WorkshopBookingContent: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Số lượng người</label>
-                  <input 
-                    type="number" 
-                    min="1" 
-                    max="30"
-                    value={formData.guests}
-                    onChange={e => setFormData({...formData, guests: parseInt(e.target.value)})}
-                    className="w-full px-6 py-4 rounded-2xl border-2 border-brand-sand/30 focus:border-brand-clay outline-none transition-all bg-brand-glaze/10"
-                  />
+                  <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Số lượng khách</label>
+                  <div className="flex items-center gap-4">
+                     <input 
+                        type="number" 
+                        min="1" 
+                        max="50"
+                        value={formData.guests}
+                        onChange={e => setFormData({...formData, guests: parseInt(e.target.value) || 1})}
+                        className="flex-grow px-6 py-4 rounded-2xl border-2 border-brand-sand/30 focus:border-brand-clay outline-none transition-all bg-brand-glaze/10"
+                      />
+                      <div className="text-xs font-bold text-brand-clay bg-brand-clay/5 px-4 py-2 rounded-lg">
+                        {formData.guests >= 10 ? 'Đoàn lớn (-20%)' : formData.guests >= 5 ? 'Đoàn vừa (-10%)' : 'Khách lẻ'}
+                      </div>
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Thời gian trải nghiệm</label>
+                  <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Gói trải nghiệm</label>
                   <select 
                     value={formData.duration}
                     onChange={e => setFormData({...formData, duration: e.target.value})}
                     className="w-full px-6 py-4 rounded-2xl border-2 border-brand-sand/30 focus:border-brand-clay outline-none transition-all bg-brand-glaze/10"
                   >
-                    <option>60 phút</option>
-                    <option>90 phút</option>
-                    <option>120 phút</option>
+                    <option value="60 phút">Cơ bản (60 phút)</option>
+                    <option value="90 phút">Sáng tạo (90 phút)</option>
+                    <option value="120 phút">Chuyên sâu (120 phút)</option>
                   </select>
                 </div>
               </div>
@@ -199,7 +278,7 @@ const WorkshopBookingContent: React.FC = () => {
                   <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Ghi chú thêm (Nếu có)</label>
                   <textarea 
                     rows={3}
-                    placeholder="Bạn có yêu cầu đặc biệt gì không?"
+                    placeholder="Ví dụ: Cần nghệ nhân hướng dẫn kỹ thuật đắp nổi hoa văn cổ..."
                     value={formData.note}
                     onChange={e => setFormData({...formData, note: e.target.value})}
                     className="w-full px-6 py-4 rounded-2xl border-2 border-brand-sand/30 focus:border-brand-clay outline-none transition-all bg-brand-glaze/10 resize-none"
@@ -207,15 +286,21 @@ const WorkshopBookingContent: React.FC = () => {
                 </div>
               </div>
 
-              <button 
-                type="submit"
-                className="w-full bg-brand-terracotta text-white font-bold py-5 rounded-2xl hover:bg-brand-clay transition-all shadow-2xl transform active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
-              >
-                Gửi yêu cầu Đặt lịch
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </button>
+              <div className="bg-brand-glaze/40 p-6 rounded-2xl border-2 border-brand-clay/10 flex flex-col md:flex-row justify-between items-center gap-4">
+                 <div className="text-center md:text-left">
+                    <p className="text-xs uppercase font-bold text-gray-500 tracking-tighter">Tổng phí ước tính:</p>
+                    <h3 className="text-3xl font-black text-brand-terracotta">{pricing.total.toLocaleString()}đ</h3>
+                 </div>
+                 <button 
+                    type="submit"
+                    className="w-full md:w-auto bg-brand-terracotta text-white font-bold py-5 px-12 rounded-2xl hover:bg-brand-clay transition-all shadow-2xl transform active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
+                  >
+                    Gửi yêu cầu & Thanh toán
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </button>
+              </div>
             </form>
           </div>
 

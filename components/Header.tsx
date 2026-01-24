@@ -12,7 +12,7 @@ const Header: React.FC = () => {
       <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-brand-sand">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <a href="index.html" className="flex items-center gap-3 group">
+            <a href="https://gom-my-thien-70d9mszo5-nh397912-dotcoms-projects.vercel.app/" className="flex items-center gap-3 group">
               <div className="bg-brand-clay text-white w-10 h-10 rounded-lg flex items-center justify-center text-2xl shadow-inner group-hover:rotate-12 transition-transform">
                 🏺
               </div>
@@ -25,10 +25,16 @@ const Header: React.FC = () => {
             </a>
           </div>
           
-          <nav className="hidden lg:flex items-center gap-8 text-sm font-bold text-brand-dark uppercase tracking-wider">
-            <a href="index.html" className="text-brand-clay transition-colors border-b-2 border-brand-clay pb-1">Đặt lịch ngay</a>
-            <a href="exchange.html" className="hover:text-brand-clay transition-colors">Sàn Giao lưu</a>
-            <a href="https://chatgpt.com" className="hover:text-brand-clay transition-colors">Tư vấn AI</a>
+          <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-[11px] font-bold text-brand-dark uppercase tracking-wider">
+            <a href="index.html" className="text-brand-clay transition-colors border-b-2 border-brand-clay pb-1">Đặt lịch</a>
+            <a href="https://gom-my-thien-70d9mszo5-nh397912-dotcoms-projects.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-clay transition-colors whitespace-nowrap flex items-center gap-1">
+              Di sản <span className="text-[8px] opacity-50">↗</span>
+            </a>
+            <a href="https://shop-gom-my-thien.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-clay transition-colors whitespace-nowrap flex items-center gap-1 text-brand-accent">
+              Cửa hàng <span className="text-[8px] opacity-50">↗</span>
+            </a>
+            <a href="exchange.html" className="hover:text-brand-clay transition-colors whitespace-nowrap">Sàn Giao lưu</a>
+            <a href="https://chatgpt.com" className="hover:text-brand-clay transition-colors whitespace-nowrap">Tư vấn AI</a>
           </nav>
 
           <div className="flex items-center gap-2">

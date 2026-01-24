@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 
 const WorkshopBooking: React.FC = () => {
@@ -13,33 +13,73 @@ const WorkshopBooking: React.FC = () => {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  const pricing = useMemo(() => {
+    let basePricePerGuest = 150000;
+    if (formData.duration === '90 phút') basePricePerGuest = 220000;
+    if (formData.duration === 'Trọn buổi (3 tiếng)') basePricePerGuest = 400000;
+
+    const total = basePricePerGuest * formData.guests;
+    let discount = 0;
+    if (formData.guests >= 5) discount = total * 0.1;
+
+    return {
+      unit: basePricePerGuest,
+      subtotal: total,
+      discount: discount,
+      total: total - discount
+    };
+  }, [formData.guests, formData.duration]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.date) {
       alert("Vui lòng điền đầy đủ thông tin bắt buộc.");
       return;
     }
-    // Simple validation for phone
     if (!/^\d{10,11}$/.test(formData.phone)) {
       alert("Số điện thoại không hợp lệ (phải gồm 10-11 chữ số).");
       return;
     }
-
     setIsSubmitted(true);
   };
 
   if (isSubmitted) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-10 text-center border-t-8 border-brand-clay animate-fade-in">
-          <div className="text-6xl mb-6">🏺</div>
-          <h2 className="text-3xl font-serif font-bold text-brand-dark mb-4">Đăng ký thành công!</h2>
-          <p className="text-gray-600 mb-8 leading-relaxed">
-            Cảm ơn <strong>{formData.name}</strong>! Chúng tôi đã nhận được yêu cầu đặt lịch cho ngày <strong>{formData.date}</strong>. 
-            Nghệ nhân Mỹ Thiện sẽ liên hệ với bạn qua số <strong>{formData.phone}</strong> để xác nhận trong thời gian sớm nhất.
-          </p>
-          <a href="index.html" className="inline-block bg-brand-terracotta text-white font-bold py-4 px-8 rounded-full hover:bg-brand-clay transition-all shadow-lg">
-            Quay về trang chủ
+        <div className="max-w-xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-10 text-center border-t-8 border-brand-clay animate-fade-in">
+          <div className="text-5xl mb-6">🧾</div>
+          <h2 className="text-3xl font-serif font-bold text-brand-dark mb-4">Xác nhận Thanh toán</h2>
+          
+          <div className="bg-gray-50 p-6 rounded-2xl mb-8 text-left text-sm">
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-500">Khách hàng:</span>
+              <span className="font-bold">{formData.name}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-500">Gói trải nghiệm:</span>
+              <span>{formData.duration}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-500">Số lượng khách:</span>
+              <span>{formData.guests} người</span>
+            </div>
+            <hr className="my-4 border-gray-200" />
+            <div className="flex justify-between text-lg font-bold text-brand-terracotta">
+              <span>Tổng chi phí:</span>
+              <span>{pricing.total.toLocaleString()}đ</span>
+            </div>
+          </div>
+
+          <div className="mb-8 space-y-4">
+            <p className="text-gray-600 text-sm">Vui lòng thanh toán qua số tài khoản sau để hoàn tất:</p>
+            <div className="bg-brand-glaze/20 p-4 rounded-xl border border-brand-sand">
+               <p className="font-bold text-brand-dark">Vietcombank: 123456789</p>
+               <p className="text-xs text-gray-500">Chủ TK: Làng gốm Mỹ Thiện</p>
+            </div>
+          </div>
+
+          <a href="index.html" className="inline-block w-full bg-brand-terracotta text-white font-bold py-4 rounded-xl hover:bg-brand-clay transition-all shadow-lg">
+            Xác nhận & Quay về trang chủ
           </a>
         </div>
       </div>
@@ -55,29 +95,30 @@ const WorkshopBooking: React.FC = () => {
           </svg>
           Trở về trang chủ
         </a>
-        <h1 className="text-4xl md:text-6xl font-serif font-bold text-brand-dark mb-6">Trải nghiệm Workshop Gốm Mỹ Thiện</h1>
+        <h1 className="text-4xl md:text-6xl font-serif font-bold text-brand-dark mb-6">Workshop Gốm Mỹ Thiện</h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Đắm mình trong không gian yên bình của làng nghề, tự tay nhào nặn đất sét và tạo nên tác phẩm mang dấu ấn cá nhân dưới sự hướng dẫn của nghệ nhân.
+          Đắm mình trong không gian yên bình của làng nghề, tự tay nhào nặn đất sét và tạo nên tác phẩm mang dấu ấn cá nhân.
         </p>
       </div>
 
       <div className="grid lg:grid-cols-5 gap-12 items-start">
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-brand-clay/10 p-6 rounded-2xl border border-brand-clay/20">
-            <h3 className="font-bold text-brand-terracotta uppercase tracking-wider text-sm mb-4">Thông tin Workshop</h3>
+            <h3 className="font-bold text-brand-terracotta uppercase tracking-wider text-sm mb-4">Chi tiết bảng giá</h3>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3 text-sm">
-                <span className="text-xl">📍</span>
-                <span>Thị trấn Châu Ổ, Bình Sơn, Quảng Ngãi</span>
+              <li className="flex justify-between text-sm">
+                <span>60 phút:</span>
+                <span className="font-bold">150.000đ/người</span>
               </li>
-              <li className="flex items-start gap-3 text-sm">
-                <span className="text-xl">💰</span>
-                <span>Từ 150.000đ / người (bao gồm nguyên liệu & nung gốm)</span>
+              <li className="flex justify-between text-sm">
+                <span>90 phút:</span>
+                <span className="font-bold">220.000đ/người</span>
               </li>
-              <li className="flex items-start gap-3 text-sm">
-                <span className="text-xl">🎨</span>
-                <span>Sản phẩm được mang về sau khi nung (khoảng 7-10 ngày)</span>
+              <li className="flex justify-between text-sm">
+                <span>3 tiếng:</span>
+                <span className="font-bold">400.000đ/người</span>
               </li>
+              <li className="text-[10px] text-brand-clay italic pt-2">* Đã bao gồm đất sét, dụng cụ và công nung sản phẩm.</li>
             </ul>
           </div>
           <img 
@@ -120,9 +161,9 @@ const WorkshopBooking: React.FC = () => {
                 <input 
                   type="number" 
                   min="1" 
-                  max="20"
+                  max="50"
                   value={formData.guests}
-                  onChange={e => setFormData({...formData, guests: parseInt(e.target.value)})}
+                  onChange={e => setFormData({...formData, guests: parseInt(e.target.value) || 1})}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-clay outline-none"
                 />
               </div>
@@ -133,9 +174,9 @@ const WorkshopBooking: React.FC = () => {
                   onChange={e => setFormData({...formData, duration: e.target.value})}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-clay outline-none"
                 >
-                  <option>60 phút</option>
-                  <option>90 phút</option>
-                  <option>Trọn buổi (3 tiếng)</option>
+                  <option value="60 phút">60 phút</option>
+                  <option value="90 phút">90 phút</option>
+                  <option value="Trọn buổi (3 tiếng)">Trọn buổi (3 tiếng)</option>
                 </select>
               </div>
             </div>
@@ -159,24 +200,27 @@ const WorkshopBooking: React.FC = () => {
               <input 
                 type="tel" 
                 required
-                placeholder="Nhập số điện thoại để chúng tôi liên hệ"
+                placeholder="Nhập số điện thoại"
                 value={formData.phone}
                 onChange={e => setFormData({...formData, phone: e.target.value})}
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-clay outline-none"
               />
             </div>
 
-            <button 
-              type="submit"
-              className="w-full bg-brand-terracotta text-white font-bold py-4 rounded-xl hover:bg-brand-clay transition-all shadow-lg transform active:scale-95 flex items-center justify-center gap-2"
-            >
-              Đặt lịch trải nghiệm ngay
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </button>
-            <p className="text-center text-xs text-gray-400">
-              * Chúng tôi sẽ liên hệ xác nhận và hướng dẫn chi tiết qua điện thoại.
+            <div className="bg-brand-glaze/30 p-4 rounded-xl flex justify-between items-center">
+              <div>
+                <span className="text-xs text-gray-500 uppercase font-bold">Thành tiền:</span>
+                <p className="text-2xl font-black text-brand-terracotta">{pricing.total.toLocaleString()}đ</p>
+              </div>
+              <button 
+                type="submit"
+                className="bg-brand-terracotta text-white font-bold py-3 px-8 rounded-xl hover:bg-brand-clay transition-all shadow-lg transform active:scale-95 flex items-center gap-2"
+              >
+                Gửi yêu cầu
+              </button>
+            </div>
+            <p className="text-center text-[10px] text-gray-400">
+              * Hệ thống sẽ hiển thị thông tin thanh toán ngay sau khi bấm Gửi.
             </p>
           </form>
         </div>
