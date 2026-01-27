@@ -10,42 +10,65 @@ const WorkshopBookingContent: React.FC = () => {
     date: '',
     timeSlot: 'Sáng (08:00 - 11:00)',
     guests: 1,
-    duration: '60 phút',
+    customerType: 'Người lớn',
     name: '',
     phone: '',
     note: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // Logic tính giá hợp lý
+  // Logic tính giá theo bảng giá mới
   const pricing = useMemo(() => {
-    let basePricePerGuest = 150000; // Mặc định 60 phút
-    if (formData.duration === '90 phút') basePricePerGuest = 220000;
-    if (formData.duration === '120 phút') basePricePerGuest = 300000;
+    let basePrice = 0;
+    let note = "";
 
-    const rawTotal = basePricePerGuest * formData.guests;
-    
-    // Chiết khấu theo số lượng khách
-    let discount = 0;
-    if (formData.guests >= 10) discount = 0.2; // Giảm 20% cho đoàn > 10 người
-    else if (formData.guests >= 5) discount = 0.1; // Giảm 10% cho đoàn > 5 người
+    switch (formData.customerType) {
+      case 'Trẻ em':
+        basePrice = 80000;
+        note = "Tặng kèm 1 sản phẩm nhỏ";
+        break;
+      case 'Người lớn':
+        basePrice = 150000;
+        note = "Tặng kèm 1 sản phẩm nhỏ";
+        break;
+      case 'Tập thể (Học sinh/Sinh viên)':
+        basePrice = 100000;
+        note = "Áp dụng cho đoàn trên 20 người";
+        break;
+      case 'Tập thể (Doanh nghiệp/Team)':
+        basePrice = 300000;
+        note = "Quà tặng lưu niệm đặc biệt";
+        break;
+      case 'Gói tháng (Trẻ em)':
+        basePrice = 500000;
+        note = "Không giới hạn số lần (Tháng)";
+        break;
+      case 'Gói tháng (Người lớn)':
+        basePrice = 1125000;
+        note = "Không giới hạn số lần (Tháng)";
+        break;
+      default:
+        basePrice = 150000;
+    }
 
-    const discountAmount = rawTotal * discount;
-    const finalTotal = rawTotal - discountAmount;
+    const total = basePrice * formData.guests;
 
     return {
-      unitPrice: basePricePerGuest,
-      subtotal: rawTotal,
-      discountPercent: discount * 100,
-      discountAmount,
-      total: finalTotal
+      unitPrice: basePrice,
+      total: total,
+      note: note
     };
-  }, [formData.guests, formData.duration]);
+  }, [formData.customerType, formData.guests]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.date) {
       alert("Vui lòng điền đầy đủ thông tin bắt buộc.");
+      return;
+    }
+    // Kiểm tra điều kiện tập thể học sinh
+    if (formData.customerType === 'Tập thể (Học sinh/Sinh viên)' && formData.guests < 20) {
+      alert("Gói Tập thể (Học sinh/Sinh viên) chỉ áp dụng cho đoàn từ 20 người trở lên.");
       return;
     }
     if (!/^\d{10,11}$/.test(formData.phone)) {
@@ -71,20 +94,16 @@ const WorkshopBookingContent: React.FC = () => {
             </div>
             <div className="flex justify-between mb-2">
               <span className="text-gray-500">Dịch vụ:</span>
-              <span className="text-brand-dark">Workshop {formData.duration} ({formData.guests} người)</span>
+              <span className="text-brand-dark">{formData.customerType} ({formData.guests} khách)</span>
             </div>
             <div className="flex justify-between mb-2">
               <span className="text-gray-500">Đơn giá:</span>
               <span>{pricing.unitPrice.toLocaleString()}đ / khách</span>
             </div>
-            <div className="flex justify-between mb-2 text-sm">
-              <span className="text-gray-500">Tạm tính:</span>
-              <span>{pricing.subtotal.toLocaleString()}đ</span>
-            </div>
-            {pricing.discountAmount > 0 && (
-              <div className="flex justify-between mb-2 text-green-600 text-sm italic">
-                <span>Ưu đãi đoàn đông ({pricing.discountPercent}%):</span>
-                <span>-{pricing.discountAmount.toLocaleString()}đ</span>
+            {pricing.note && (
+              <div className="flex justify-between mb-2 text-xs text-brand-clay italic">
+                <span>Ưu đãi kèm theo:</span>
+                <span>{pricing.note}</span>
               </div>
             )}
             <div className="flex justify-between border-t border-brand-clay/20 pt-4 mt-4">
@@ -158,21 +177,47 @@ const WorkshopBookingContent: React.FC = () => {
               <LocationService />
 
               <div className="mt-8 pt-6 border-t border-brand-sand/30">
-                <h4 className="text-brand-terracotta font-bold text-sm uppercase mb-4 text-center">Bảng giá tham khảo</h4>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 italic">Cơ bản (60 phút)</span>
-                    <span className="font-bold">150k/người</span>
+                <h4 className="text-brand-terracotta font-bold text-sm uppercase mb-4 text-center">Bảng giá niêm yết</h4>
+                <div className="space-y-4">
+                  <div className="border-b border-brand-sand/20 pb-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-700 font-medium">Trẻ em</span>
+                      <span className="font-bold text-brand-clay">80.000đ</span>
+                    </div>
+                    <p className="text-[10px] text-gray-400 italic">Tặng kèm 1 sản phẩm nhỏ</p>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 italic">Sáng tạo (90 phút)</span>
-                    <span className="font-bold">220k/người</span>
+                  <div className="border-b border-brand-sand/20 pb-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-700 font-medium">Người lớn</span>
+                      <span className="font-bold text-brand-clay">150.000đ</span>
+                    </div>
+                    <p className="text-[10px] text-gray-400 italic">Tặng kèm 1 sản phẩm nhỏ</p>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 italic">Chuyên sâu (120 phút)</span>
-                    <span className="font-bold">300k/người</span>
+                  <div className="border-b border-brand-sand/20 pb-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-700 font-medium">Tập thể (Học sinh/SV)</span>
+                      <span className="font-bold text-brand-clay">100.000đ</span>
+                    </div>
+                    <p className="text-[10px] text-gray-400 italic">Áp dụng đoàn trên 20 người</p>
                   </div>
-                  <p className="text-[10px] text-brand-clay mt-2">* Miễn phí nung gốm & tráng men cơ bản. Giảm giá 10-20% cho đoàn khách từ 5 người.</p>
+                  <div className="border-b border-brand-sand/20 pb-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-700 font-medium">Tập thể (Doanh nghiệp)</span>
+                      <span className="font-bold text-brand-clay">300.000đ</span>
+                    </div>
+                    <p className="text-[10px] text-gray-400 italic">Quà tặng lưu niệm đặc biệt</p>
+                  </div>
+                  <div className="bg-brand-glaze/20 p-3 rounded-lg">
+                    <h5 className="text-[10px] font-bold text-brand-terracotta uppercase mb-1">Gói đăng ký tháng</h5>
+                    <div className="flex justify-between text-[11px]">
+                      <span>Trẻ em:</span>
+                      <span className="font-bold">500.000đ</span>
+                    </div>
+                    <div className="flex justify-between text-[11px]">
+                      <span>Người lớn:</span>
+                      <span className="font-bold">1.125.000đ</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -220,39 +265,37 @@ const WorkshopBookingContent: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Số lượng khách</label>
-                  <div className="flex items-center gap-4">
-                     <input 
-                        type="number" 
-                        min="1" 
-                        max="50"
-                        value={formData.guests}
-                        onChange={e => setFormData({...formData, guests: parseInt(e.target.value) || 1})}
-                        className="flex-grow px-6 py-4 rounded-2xl border-2 border-brand-sand/30 focus:border-brand-clay outline-none transition-all bg-brand-glaze/10"
-                      />
-                      <div className="text-xs font-bold text-brand-clay bg-brand-clay/5 px-4 py-2 rounded-lg">
-                        {formData.guests >= 10 ? 'Đoàn lớn (-20%)' : formData.guests >= 5 ? 'Đoàn vừa (-10%)' : 'Khách lẻ'}
-                      </div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Gói trải nghiệm</label>
+                  <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Đối tượng tham gia / Gói</label>
                   <select 
-                    value={formData.duration}
-                    onChange={e => setFormData({...formData, duration: e.target.value})}
+                    value={formData.customerType}
+                    onChange={e => setFormData({...formData, customerType: e.target.value})}
                     className="w-full px-6 py-4 rounded-2xl border-2 border-brand-sand/30 focus:border-brand-clay outline-none transition-all bg-brand-glaze/10"
                   >
-                    <option value="60 phút">Cơ bản (60 phút)</option>
-                    <option value="90 phút">Sáng tạo (90 phút)</option>
-                    <option value="120 phút">Chuyên sâu (120 phút)</option>
+                    <option value="Trẻ em">Trẻ em (80.000đ)</option>
+                    <option value="Người lớn">Người lớn (150.000đ)</option>
+                    <option value="Tập thể (Học sinh/Sinh viên)">Tập thể (HS/SV - Đoàn > 20 người)</option>
+                    <option value="Tập thể (Doanh nghiệp/Team)">Tập thể (Doanh nghiệp)</option>
+                    <option value="Gói tháng (Trẻ em)">Gói tháng (Trẻ em - 500k)</option>
+                    <option value="Gói tháng (Người lớn)">Gói tháng (Người lớn - 1.125k)</option>
                   </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Số lượng khách</label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    max="100"
+                    value={formData.guests}
+                    onChange={e => setFormData({...formData, guests: parseInt(e.target.value) || 1})}
+                    className="w-full px-6 py-4 rounded-2xl border-2 border-brand-sand/30 focus:border-brand-clay outline-none transition-all bg-brand-glaze/10"
+                  />
                 </div>
               </div>
 
               <div className="space-y-6 pt-6 border-t border-brand-sand/30">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Họ và tên *</label>
+                    <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Họ và tên người đặt *</label>
                     <input 
                       type="text" 
                       required
@@ -263,7 +306,7 @@ const WorkshopBookingContent: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Số điện thoại *</label>
+                    <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Số điện thoại liên hệ *</label>
                     <input 
                       type="tel" 
                       required
@@ -278,7 +321,7 @@ const WorkshopBookingContent: React.FC = () => {
                   <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Ghi chú thêm (Nếu có)</label>
                   <textarea 
                     rows={3}
-                    placeholder="Ví dụ: Cần nghệ nhân hướng dẫn kỹ thuật đắp nổi hoa văn cổ..."
+                    placeholder="Yêu cầu cụ thể của bạn..."
                     value={formData.note}
                     onChange={e => setFormData({...formData, note: e.target.value})}
                     className="w-full px-6 py-4 rounded-2xl border-2 border-brand-sand/30 focus:border-brand-clay outline-none transition-all bg-brand-glaze/10 resize-none"
@@ -295,7 +338,7 @@ const WorkshopBookingContent: React.FC = () => {
                     type="submit"
                     className="w-full md:w-auto bg-brand-terracotta text-white font-bold py-5 px-12 rounded-2xl hover:bg-brand-clay transition-all shadow-2xl transform active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
                   >
-                    Gửi yêu cầu & Thanh toán
+                    Gửi yêu cầu đặt lịch
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
