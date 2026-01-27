@@ -79,6 +79,25 @@ const WorkshopBookingContent: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleShare = async () => {
+    const shareText = `🏺 Tôi vừa đặt lịch trải nghiệm Gốm Mỹ Thiện!\n👤 Khách hàng: ${formData.name}\n📦 Gói: ${formData.customerType}\n👥 Số lượng: ${formData.guests} người\n📅 Ngày: ${formData.date}\n💰 Tổng: ${pricing.total.toLocaleString()}đ\nCùng khám phá di sản 200 năm Quảng Ngãi nhé!`;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Đặt lịch Workshop Gốm Mỹ Thiện',
+          text: shareText,
+          url: window.location.href
+        });
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        alert('Đã sao chép thông tin đặt lịch vào bộ nhớ tạm!');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  };
+
   if (isSubmitted) {
     return (
       <div className="flex-grow flex items-center justify-center p-6 bg-pottery-texture">
@@ -123,13 +142,22 @@ const WorkshopBookingContent: React.FC = () => {
               onClick={() => setIsSubmitted(false)}
               className="bg-gray-100 text-gray-700 font-bold py-4 px-8 rounded-2xl hover:bg-gray-200 transition-all"
             >
-              Chỉnh sửa thông tin
+              Chỉnh sửa
+            </button>
+            <button 
+              onClick={handleShare}
+              className="bg-brand-accent text-white font-bold py-4 px-8 rounded-2xl hover:bg-opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              Chia sẻ
             </button>
             <button 
               onClick={() => window.location.href = 'index.html'}
               className="bg-brand-terracotta text-white font-bold py-4 px-12 rounded-2xl hover:bg-brand-clay transition-all shadow-xl transform hover:-translate-y-1"
             >
-              Hoàn tất & Về trang chủ
+              Hoàn tất
             </button>
           </div>
         </div>
