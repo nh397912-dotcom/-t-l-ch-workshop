@@ -301,7 +301,7 @@ const WorkshopBookingContent: React.FC = () => {
                   >
                     <option value="Trẻ em">Trẻ em (80.000đ)</option>
                     <option value="Người lớn">Người lớn (150.000đ)</option>
-                    <option value="Tập thể (Học sinh/Sinh viên)">Tập thể (HS/SV - Đoàn lớn hơn 20 người)</option>
+                    <option value="Tập thể (Học sinh/Sinh viên)">Tập thể (HS/SV - Đoàn > 20 người)</option>
                     <option value="Tập thể (Doanh nghiệp/Team)">Tập thể (Doanh nghiệp)</option>
                     <option value="Gói tháng (Trẻ em)">Gói tháng (Trẻ em - 500k)</option>
                     <option value="Gói tháng (Người lớn)">Gói tháng (Người lớn - 1.125k)</option>
